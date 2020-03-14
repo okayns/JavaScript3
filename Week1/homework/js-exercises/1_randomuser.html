@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Exercise 1: Who do we have here?</title>
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      function withXmlRequest() {
+        const xhr = new XMLHttpRequest();
+        xhr.responseType = 'json';
+        xhr.open('GET', 'https://www.randomuser.me/api');
+        xhr.onload = function() {
+          if (xhr.status >= 200 && xhr.status <= 299) {
+            console.log(xhr.response.results[0]);
+          } else {
+            console.log(`Network error: ${xhr.status}`);
+          }
+        };
+        xhr.onerror = () => console.log('Network request failed');
+        xhr.send();
+      }
+
+      function withAxios() {
+        axios
+          .get('https://www.randomuser.me/api')
+          .then(res => console.log(res.data.results[0]))
+          .catch(err => console.error(err));
+      }
+
+      withXmlRequest();
+      withAxios();
+    </script>
+  </body>
+</html>

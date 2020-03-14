@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dog Gallery</title>
+    <style>
+      body {
+        text-align: center;
+        background-color: #eaf6f6;
+      }
+      img {
+        width: 200px;
+        height: 200px;
+      }
+      ul {
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+      }
+      li {
+        margin: 10px;
+      }
+      button {
+        cursor: pointer;
+        border: 2px solid #00aa66;
+        border-radius: 15px;
+        padding: 0.5rem;
+        font-size: 1.3rem;
+      }
+    </style>
+  </head>
+  <body>
+    <img src="" alt="" style="width: 50px; height: 50px;" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+      const btn = document.createElement('button');
+      const ul = document.createElement('ul');
+      document.body.appendChild(btn);
+      document.body.appendChild(ul);
+      btn.textContent = 'CLICK ME!';
+
+      function callDogs() {
+        axios
+          .get('https://dog.ceo/api/breeds/image/random')
+          .then(
+            res =>
+              (ul.innerHTML +=
+                '<li>' + '<img ' + 'src=' + res.data.message + '>' + '</li>'),
+          )
+          .catch(err => console.log(err));
+      }
+
+      btn.addEventListener('click', callDogs);
+    </script>
+  </body>
+</html>

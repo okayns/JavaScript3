@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Exercise 2: Programmer humor</title>
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      const img = document.createElement('img');
+      document.body.appendChild(img);
+
+      function withXmlRequest() {
+        const xhr = new XMLHttpRequest();
+        xhr.responseType = 'json';
+        xhr.open('GET', 'https://xkcd.now.sh/?comic=614');
+
+        xhr.onload = function() {
+          if (this.status >= 200 && this.status <= 299) {
+            img.src = this.response.img;
+          } else {
+            console.log(`Network error: ${xhr.status}`);
+          }
+        };
+        xhr.onerror = () => console.log('Network request failed');
+        xhr.send();
+      }
+
+      function withAxios() {
+        axios('https://xkcd.now.sh/?comic=614')
+          .then(res => (img.src = res.data.img))
+          .catch(err => console.log(err));
+      }
+
+      withXmlRequest();
+      // withAxios();
+    </script>
+  </body>
+</html>
