@@ -1,19 +1,35 @@
 'use strict';
 
 {
-  function fetchJSON(url, cb) {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', url);
-    xhr.responseType = 'json';
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status <= 299) {
-        cb(null, xhr.response);
-      } else {
-        cb(new Error(`Network error: ${xhr.status} - ${xhr.statusText}`));
+  const root = document.getElementById('root');
+  const mainContainer = document.querySelector('.main-container');
+  const repoContainer = document.querySelector('.repo-container');
+  const contributorsContainer = document.querySelector(
+    '.contributors-container',
+  );
+  const selectElement = document.querySelector('select');
+  const ulRepo = createAndAppend('ul', repoContainer);
+  const ulContributor = createAndAppend('ul', contributorsContainer);
+
+  async function fetchJSON(url) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        throw Error('Failed to Fetch');
       }
-    };
-    xhr.onerror = () => cb(new Error('Network request failed'));
-    xhr.send();
+      return res.json();
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async function main(url) {
+    try {
+      const response = await fetchJSON(url);
+      createSelection(response);
+    } catch (err) {
+      callError(err);
+    }
   }
 
   function createAndAppend(name, parent, options = {}) {
@@ -29,22 +45,85 @@
     return elem;
   }
 
-  function renderRepoDetails(repo, ul) {
-    createAndAppend('li', ul, { text: repo.name });
+  function createSelection(repos) {
+    repos
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .forEach(repo => {
+        createAndAppend('option', selectElement, {
+          value: repos.indexOf(repo),
+          text: repo.name,
+        });
+      });
+    selectElement.addEventListener('change', () => {
+      ulRepo.innerHTML = '';
+      ulContributor.innerHTML = '';
+      renderRepoDetails(repos[selectElement.value], ulRepo);
+      renderContributorDetails(repos[selectElement.value], ulContributor);
+    });
+    renderRepoDetails(repos[selectElement.value], ulRepo);
+    renderContributorDetails(repos[selectElement.value], ulContributor);
   }
 
-  function main(url) {
-    fetchJSON(url, (err, repos) => {
-      const root = document.getElementById('root');
-      if (err) {
-        createAndAppend('div', root, {
-          text: err.message,
-          class: 'alert-error',
-        });
-        return;
-      }
-      const ul = createAndAppend('ul', root);
-      repos.forEach(repo => renderRepoDetails(repo, ul));
+  function createRepoTable(header, description, item, link) {
+    const repoBox = createAndAppend('div', item, { class: 'repo-item' });
+    createAndAppend('h4', repoBox, { text: header });
+    const repoDescription = createAndAppend('p', repoBox);
+    if (header === 'Repository') {
+      createAndAppend('a', repoDescription, {
+        href: link,
+        text: description,
+      });
+    } else {
+      repoDescription.textContent = description;
+    }
+  }
+
+  function renderRepoDetails(repo, ul) {
+    const repoItem = createAndAppend('li', ul, {
+      class: 'repo-liItem',
+    });
+    createRepoTable('Repository:', repo.name, repoItem);
+    createRepoTable('Description:', repo.description, repoItem);
+    createRepoTable('Forks:', repo.forks, repoItem);
+    createRepoTable('Updated:', convertTime(repo.updated_at), repoItem);
+  }
+
+  function createContributorsTable(header, item) {
+    const contributorBox = createAndAppend('div', item, {
+      class: 'contributor-item',
+    });
+    createAndAppend('img', contributorBox, { src: header.avatar_url });
+    createAndAppend('a', contributorBox, {
+      href: header.html_url,
+      text: header.login,
+    });
+    createAndAppend('span', contributorBox, { text: header.contributions });
+  }
+
+  async function renderContributorDetails(elem, ul) {
+    const res = await fetchJSON(elem.contributors_url);
+    try {
+      const contributorItem = createAndAppend('li', ul, {
+        class: 'contributor-liItem',
+      });
+      res.forEach(item => {
+        createContributorsTable(item, contributorItem);
+      });
+    } catch (err) {
+      callError(err);
+    }
+  }
+
+  function convertTime(time) {
+    const dateTime = new Date(time);
+    return dateTime.toLocaleString();
+  }
+
+  function callError(err) {
+    mainContainer.style.display = 'none';
+    createAndAppend('div', root, {
+      text: err.message,
+      class: 'alert-error',
     });
   }
 
