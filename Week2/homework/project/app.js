@@ -13,8 +13,15 @@
 
   function fetchJSON(url) {
     return fetch(url)
-      .then(res => res.json())
-      .catch(err => callError(err));
+      .then(res => {
+        if (!res.ok) {
+          throw Error('Hata');
+        }
+        return res.json();
+      })
+      .catch(err => {
+        throw err;
+      });
   }
 
   function main(url) {
