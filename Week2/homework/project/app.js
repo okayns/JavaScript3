@@ -14,14 +14,13 @@
   function fetchJSON(url) {
     return fetch(url)
       .then(res => res.json())
-      .catch(err => console.error(err));
+      .catch(err => callError(err));
   }
 
   function main(url) {
     fetchJSON(url)
       .then(repos => {
-        repos.sort((a, b) => a.name.localeCompare(b.name));
-        createOptionTab(repos);
+        createSelection(repos);
       })
       .catch(err => callError(err));
   }
@@ -39,7 +38,7 @@
     return elem;
   }
 
-  function createOptionTab(repos) {
+  function createSelection(repos) {
     repos
       .sort((a, b) => a.name.localeCompare(b.name))
       .forEach(repo => {
@@ -104,7 +103,7 @@
           createContributorsTable(item, contributorItem);
         });
       })
-      .catch(err => console.log(err));
+      .catch(err => callError(err));
   }
 
   function convertTime(time) {
@@ -118,7 +117,6 @@
       text: err.message,
       class: 'alert-error',
     });
-    return;
   }
 
   const HYF_REPOS_URL =
